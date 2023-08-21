@@ -1,9 +1,12 @@
 const express = require("express");
-const app = express()
+const rotas = require("./rotas")
 
-app.get("/", (req, res) => {
-   res.send("testando a porta")
-   
-})
+const app = express();
+
+app.use(express.json()); // As requisições virão no formato JSON.
+
+app.use(rotas);
+
+
 
 app.listen(3333)
