@@ -120,7 +120,31 @@ const atualizarUsuario = (req, res) => {
   return res.status(204).json();
 };
 
-const excluirContaBancaria = (req, res) => {};
+const excluirContaBancaria = (req, res) => {
+
+  const numeroConta = req.params.numeroConta;
+
+  // Verifica se o número da conta é válido 
+  const conta = contas.find(conta => conta.numero === Number(numeroConta));
+  if (!conta) {
+    return res
+      .status(404)
+      .json({ mensagem: "Conta bancária não encontrada!" });
+  }
+
+  // Verifica se o saldo é zero
+  if (conta.saldo !== 0) {
+    return res
+      .status(400)
+      .json({ mensagem: "A conta só pode ser removida se o saldo for zero!" });
+  }
+
+  // Remove a conta do array de contas
+  const removeConta = contas.indexOf(conta);
+  contas.splice(removeConta, 1);
+
+  return res.status(204).json();
+};
 
 const depositar = (req, res) => {};
 
