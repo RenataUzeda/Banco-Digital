@@ -10,6 +10,8 @@ const validarCampos = require("../intermediarios");
 
 let { idContaBancaria } = require("../bancodedados");
 
+
+
 const listarContasBancarias = (req, res) => {
   const senhaBanco = req.query.senha_banco;
 
@@ -54,7 +56,7 @@ const atualizarUsuario = (req, res) => {
   const numeroConta = req.params.numeroConta;
   const dadosAtualizados = req.body;
 
-  const conta = contas.find((conta) => conta.numero === Number(numeroConta));
+  const conta = contas.find((conta) => conta.numero === numeroConta);
 
   if (!conta) {
     return res.status(404).json({ mensagem: "Conta bancária não encontrada!" });
@@ -146,9 +148,49 @@ const excluirContaBancaria = (req, res) => {
   return res.status(204).json();
 };
 
-const depositar = (req, res) => {};
+const depositar = (req, res) => {
+const { numero_conta, valor } = req.body;
 
-const sacar = (req, res) => {};
+// Verifica se o número da conta e o valor do depósito foram informados no body
+if (!numero_conta || !valor) {
+  return res
+    .status(400)
+    .json({ mensagem: "O número da conta e o valor são obrigatórios!" });
+}
+
+// Verifica se a conta bancária informada existe
+const conta = contas.find((c) => c.numero === numero_conta);
+if (!conta) {
+  return res.status(404).json({ mensagem: "Conta bancária não encontrada!" });
+}
+
+// Não permiti depósitos com valores negativos ou zerados
+if (req.body.valor <= 0) {
+  return res
+    .status(400)
+    .json({ mensagem: "O valor do depósito deve ser maior que zero!" });
+}
+
+// Soma o valor de depósito ao saldo da conta encontrada
+conta.saldo += valor;
+
+// Registra o depósito
+const registroDeposito = {
+  data: new Date().toISOString(),
+  numero_conta,
+  valor,
+};
+depositos.push(registroDeposito);
+
+// Console.log(registroDeposito);
+
+return res.status(204).json();
+
+};
+
+const sacar = (req, res) => {
+  
+};
 
 const transferir = (req, res) => {};
 
