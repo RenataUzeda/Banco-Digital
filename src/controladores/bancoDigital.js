@@ -38,7 +38,7 @@ const criarContasBancarias = (req, res) => {
     return camposInvalidos;
   }
 
-  const numeroConta = idContaBancaria;
+  const numeroConta = idContaBancaria.toString();
   idContaBancaria++;
 
   const novaContaBancaria = {
@@ -229,13 +229,67 @@ const sacar = (req, res) => {
   };
   saques.push(registroSaque);
 
-  console.log(registroSaque);
+  // console.log(registroSaque);
 
   return res.status(204).json();
 };
 
+const transferir = (req, res) => {
+  const { numero_conta_origem, numero_conta_destino, valor, senha } = req.body;
 
-const transferir = (req, res) => {};
+  if (!numero_conta_origem || !numero_conta_destino || !valor || !senha) {
+    return res
+      .status(400)
+      .json({ mensagem: "Número da conta de origem, número da conta de destino, valor e senha são obrigatórios!" });
+  }
+
+  const contaOrigem = contas.find(conta => conta.numero === numero_conta_origem);
+  const contaDestino = contas.find(conta => conta.numero === numero_conta_destino);
+
+  if (!contaOrigem) {
+    return res
+      .status(404)
+      .json({ mensagem: "Conta de origem não encontrada!" });
+  }
+
+  if (!contaDestino) {
+    return res
+      .status(404)
+      .json({ mensagem: "Conta de destino não encontrada!" });
+  }
+
+  // Verifica se a senha informada é válida para a conta de origem
+  if (contaOrigem.usuario.senha !== senha) {
+    return res
+      .status(401)
+      .json({ mensagem: "Senha incorreta para a conta de origem!" });
+  }
+
+  // Verifica se há saldo suficiente na conta de origem
+  if (contaOrigem.saldo < valor) {
+    return res
+      .status(400)
+      .json({ mensagem: "Saldo insuficiente!" });
+  }
+
+  // Realiza a transferência
+  contaOrigem.saldo -= valor;
+  contaDestino.saldo += valor;
+
+  // Registra a transação
+  const registroTransferencia = {
+    data: new Date().toISOString(),
+    numero_conta_origem,
+    numero_conta_destino,
+    valor,
+  };
+
+  transferencias.push(registroTransferencia);
+
+  console.log(registroTransferencia);
+
+  return res.status(204).json();
+};
 
 const saldo = (req, res) => {};
 
