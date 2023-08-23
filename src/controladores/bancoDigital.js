@@ -189,8 +189,51 @@ return res.status(204).json();
 };
 
 const sacar = (req, res) => {
-  
+  const { numero_conta, valor, senha } = req.body;
+
+  if (!numero_conta || !valor || !senha) {
+    return res
+      .status(400)
+      .json({ mensagem: "O número da conta, o valor e a senha são obrigatórios!" });
+  }
+
+  const conta = contas.find(conta => conta.numero === numero_conta);
+  if (!conta) {
+    return res
+      .status(404)
+      .json({ mensagem: "Conta bancária não encontrada!" });
+  }
+
+  // Verificar a senha
+  if (conta.usuario.senha !== senha) {
+    return res
+      .status(401)
+      .json({ mensagem: "Senha inválida!" });
+  }
+
+  // Verificar saldo disponível
+  if (conta.saldo < valor) {
+    return res
+      .status(403)
+      .json({ mensagem: "Saldo insuficiente para saque!" });
+  }
+
+  // Realizar o saque e atualizar saldo
+  conta.saldo -= valor;
+
+  // Registrar a transação de saque
+  const registroSaque = {
+    data: new Date().toISOString(),
+    numero_conta,
+    valor,
+  };
+  saques.push(registroSaque);
+
+  console.log(registroSaque);
+
+  return res.status(204).json();
 };
+
 
 const transferir = (req, res) => {};
 
