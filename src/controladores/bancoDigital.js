@@ -127,7 +127,7 @@ const excluirContaBancaria = (req, res) => {
   const numeroConta = req.params.numeroConta;
 
   // Verifica se o número da conta é válido 
-  const conta = contas.find(conta => conta.numero === Number(numeroConta));
+  const conta = contas.find(conta => conta.numero === numeroConta);
   if (!conta) {
     return res
       .status(404)
@@ -291,7 +291,25 @@ const transferir = (req, res) => {
   return res.status(204).json();
 };
 
-const saldo = (req, res) => {};
+const saldo = (req, res) => {
+  const { numero_conta, senha } = req.query;
+
+  if (!numero_conta || !senha) {
+    return res.status(400).json({ mensagem: "Número da conta e senha são obrigatórios!" });
+  }
+
+  const conta = contas.find(conta => conta.numero === numero_conta);
+
+  if (!conta) {
+    return res.status(404).json({ mensagem: "Conta bancária não encontrada!" });
+  }
+
+  if (conta.usuario.senha !== senha) {
+    return res.status(401).json({ mensagem: "Senha inválida!" });
+  }
+
+  return res.status(200).json({ saldo: conta.saldo });
+};
 
 const extrato = (req, res) => {};
 
